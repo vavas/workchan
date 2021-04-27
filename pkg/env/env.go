@@ -2,6 +2,7 @@ package env
 
 import (
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
@@ -29,4 +30,9 @@ func LoadEnvFileIfNeeded(environment string) error {
 	}
 
 	return nil
+}
+
+func IsEnabled(key string) bool {
+	val := os.Getenv(key)
+	return strings.ToLower(val) == "true"
 }

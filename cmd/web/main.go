@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vavas/workchan/app/config"
 	"github.com/vavas/workchan/app/server"
+	"github.com/vavas/workchan/pkg/db"
 	"github.com/vavas/workchan/pkg/env"
 )
 
@@ -20,7 +21,16 @@ func main() {
 
 	conf, err := config.Load(appEnv)
 
-	router, err := server.ConfigureRouter(&server.RouterDeps{})
+	dbConns, err := db.Load(conf.Database)
+	if err != nil {
+		logger.Fatalf("Could not connect to the DB: %v\n", err)
+	}
+
+	defer dbConns.Close()
+
+	router, err := server.ConfigureRouter(&server.RouterDeps{
+		DbConns: dbConns,
+	})
 	if err != nil {
 		logger.Fatalf("Could not initialize the Router: %v\n", err)
 	}

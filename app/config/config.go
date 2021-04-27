@@ -1,14 +1,26 @@
 package config
 
-import "os"
+import (
+	"github.com/vavas/workchan/pkg/env"
+	"os"
+)
 
 // Server contains the configuration for Gin server
 type Server struct {
 	TCPPort string
 }
 
+// Database contains configuration for the DB.
+type Database struct {
+	MasterURL  string
+	ReaderURL  string
+	PoolSize   int
+	LogQueries bool
+}
+
 type Config struct {
 	*Server
+	*Database
 }
 
 const unknown = "unknown"
@@ -21,6 +33,12 @@ func Load(appEnv string) (*Config, error) {
 		Server: &Server{
 			TCPPort: serverPort(),
 		},
+		Database: &Database{
+			MasterURL:  databaseMasterURL(),
+			ReaderURL:  databaseReaderURL(),
+			PoolSize:   databasePoolSize(),
+			LogQueries: databaseLogQueries(),
+		},
 	}
 
 	return &config, nil
@@ -28,4 +46,20 @@ func Load(appEnv string) (*Config, error) {
 
 func serverPort() string {
 	return os.Getenv("PORT")
+}
+
+func databaseMasterURL() string {
+	return os.Getenv("DATABASE_URL")
+}
+
+func databaseReaderURL() string {
+	return os.Getenv("DATABASE_READER_URL")
+}
+
+func databasePoolSize() int {
+	return 100
+}
+
+func databaseLogQueries() bool {
+	return env.IsEnabled("DATABASE_QUERY_LOGGING_ENABLED")
 }

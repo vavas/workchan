@@ -6,6 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vavas/workchan/app/config"
 	"github.com/vavas/workchan/app/server/endpoints"
+	"github.com/vavas/workchan/app/server/middleware"
+	"github.com/vavas/workchan/pkg/db"
 	"net/http"
 	"time"
 )
@@ -13,11 +15,14 @@ import (
 type RouterDeps struct {
 	Logger     logrus.FieldLogger
 	APIAuthMap gin.Accounts
+	DbConns    *db.DB
 }
 
 func ConfigureRouter(deps *RouterDeps) (*gin.Engine, error) {
 	g := gin.New()
+	g.Use(middleware.InjectDBConnections(deps.DbConns))
 	g.GET("/healthcheck", endpoints.HealthCheck)
+	g.GET("/dbcheck", endpoints.DBCheck)
 	return g, nil
 }
 
