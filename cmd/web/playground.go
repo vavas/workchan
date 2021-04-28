@@ -12,11 +12,3 @@ func worker() chan int {
 
 	return ch
 }
-
-func main() {
-	timeStart := time.Now()
-
-	_, _ = <-worker(), worker()
-
-	println(int(time.Since(timeStart).Seconds())) // 3 or 6 ?
-}

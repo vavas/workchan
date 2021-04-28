@@ -8,8 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const projectDirName = "workchan"
-
 func GetAppEnv() string {
 	appEnv := os.Getenv("APP_ENV")
 	if appEnv == "" {
