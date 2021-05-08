@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/vavas/workchan/app/config"
@@ -13,16 +14,20 @@ import (
 )
 
 type RouterDeps struct {
-	Logger     logrus.FieldLogger
-	APIAuthMap gin.Accounts
-	DbConns    *db.DB
+	Logger        logrus.FieldLogger
+	APIAuthMap    gin.Accounts
+	DbConns       *db.DB
+	KafkaProducer *kafka.Producer
 }
 
 func ConfigureRouter(deps *RouterDeps) (*gin.Engine, error) {
 	g := gin.New()
 	g.Use(middleware.InjectDBConnections(deps.DbConns))
+	g.Use(middleware.InjectKafkaProducer(deps.KafkaProducer))
 	g.GET("/healthcheck", endpoints.HealthCheck)
 	g.GET("/dbcheck", endpoints.DBCheck)
+	g.GET("/kafkacheck", endpoints.KafkaCheck)
+	g.GET("/create_job", endpoints.CreateJob)
 	return g, nil
 }
 

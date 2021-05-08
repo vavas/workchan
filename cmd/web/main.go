@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/sirupsen/logrus"
 	"github.com/vavas/workchan/app/config"
 	"github.com/vavas/workchan/app/server"
@@ -28,8 +29,16 @@ func main() {
 
 	defer dbConns.Close()
 
+	kafkaProducer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	if err != nil {
+		panic(err)
+	}
+
+	defer kafkaProducer.Close()
+
 	router, err := server.ConfigureRouter(&server.RouterDeps{
-		DbConns: dbConns,
+		DbConns:       dbConns,
+		KafkaProducer: kafkaProducer,
 	})
 	if err != nil {
 		logger.Fatalf("Could not initialize the Router: %v\n", err)
